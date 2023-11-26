@@ -1,17 +1,3 @@
 {
-	"accounts":	[{
-			"name":	"joshua",
-			"address":	"home",
-			"phone":	"1234567",
-			"pin":	"1234",
-			"accountNumber":	"128736",
-			"balance":	0
-		}, {
-			"name":	"joshu",
-			"address":	"sj",
-			"phone":	"js",
-			"pin":	"js",
-			"accountNumber":	"js",
-			"balance":	2.14576204021101e-314
-		}]
+	"accounts":	[]
 }
