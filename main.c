@@ -10,16 +10,19 @@
 #define MAX_ADDRESS_LENGTH 50
 #define MAX_PHONE_LENGTH 15
 #define MAX_PIN_LENGTH 6
-#define MAX_ACCOUNT_LENGTH 10
 #define JSON_FILE "accounts.json"
 
 
 typedef struct {
     char name[MAX_NAME_LENGTH];
-    char address[MAX_ADDRESS_LENGTH];
+    char country[MAX_ADDRESS_LENGTH];
+    char state[MAX_ADDRESS_LENGTH];
+    char city[MAX_ADDRESS_LENGTH];
+    char street[MAX_ADDRESS_LENGTH];
+    char houseNumber[MAX_ADDRESS_LENGTH];
     char phone[MAX_PHONE_LENGTH];
     char pin[MAX_PIN_LENGTH];
-    char accountNumber[MAX_ACCOUNT_LENGTH];
+    char code[MAX_PIN_LENGTH];
     double balance;
 } Account;
 
@@ -35,7 +38,8 @@ void viewDetails(const Account *user, cJSON *json);
 void deleteAccount(Account *user, cJSON *json);
 void saveToFile(const cJSON *json, const char *filename);
 void delay(int number_of_seconds);
-int randomNumber();
+int randomNumber(cJSON *json);
+int accountNumberExists(int num, cJSON *accounts, int size);
 cJSON *loadFromFile(const char *filename);
 
 int main() {
@@ -56,17 +60,16 @@ int main() {
 }
 
 void welcome() {
-    printf("Welcome to the Bank Management System\n");
-    printf("Press Enter to continue\n");
-    getchar();
-    system("clear"); // For Windows, use "cls".
+    printf("Welcome to the Bank\n");
+    // system("clear"); // For Windows, use "cls".
 }
 
 void login(Account *user, cJSON *json) {
+    int success = 0;
+    char* currentUser;
+
     printf("Enter your username: ");
     scanf("%s", user->name);
-    printf("Enter your password: ");
-    scanf("%s", user->pin);
 
     cJSON *accounts = cJSON_GetObjectItem(json, "accounts");
     if (cJSON_IsArray(accounts)) {
@@ -76,29 +79,55 @@ void login(Account *user, cJSON *json) {
             const char *name = cJSON_GetObjectItem(account, "name")->valuestring;
             const char *pin = cJSON_GetObjectItem(account, "pin")->valuestring;
 
-            if (strcmp(user->name, name) == 0 && strcmp(user->pin, pin) == 0) {
-                printf("Login successful\n");
-                delay(1);
-                system("clear"); // For Windows, use "cls".
-                return;
+            if (strcmp(user->name, name) == 0) {
+                printf("Enter your password: ");
+                scanf("%s", user->pin);
+
+                if (strcmp(user->pin, pin) == 0) {
+                    printf("Login successful\n");
+                    delay(1);
+                    // system("clear"); // For Windows, use "cls".
+                    success = 1;
+                    return;
+                } else {
+                    printf("Incorrect pin\n");
+                    delay(1);
+                     system("clear"); // For Windows, use "cls"
+                    login(user, json);
+                }
             }
+
+//            if (strcmp(user->name, name) == 0 && strcmp(user->pin, pin) == 0) {
+//                printf("Login successful\n");
+//                delay(1);
+//                // system("clear"); // For Windows, use "cls".
+//                success = 1;
+//                return;
+//            } else if (strcmp(user->name, name) == 0 && strcmp(user->pin, pin) != 0) {
+//                printf("Incorrect pin\n");
+//                delay(1);
+//                // system("clear"); // For Windows, use "cls".
+//                success = 1;
+//                login(user, json);
+//            }
         }
     }
 
     // Account creation intent. Invoked when username not detected.
     // Now, it only gets called when an incorrect pin has been entered. Need to fix.
-    printf("Username does not exist. Do you want to create a new account? (1 for yes, 0 for no): ");
-    int createNewAccount;
-    scanf("%d", &createNewAccount);
+    printf("Username does not exist. Do you want to create a new account? (yes or no): ");
+    char *createNewAccount;
+    scanf("%s", createNewAccount);
 
-    if (createNewAccount) {
+    if (strcmp(createNewAccount, "yes") == 0) {
+        printf("Creating new account...\n");
         newAccount(json);
         saveToFile(json, "accounts.json");
         login(user, json); // Reattempt login after creating the account
     } else {
         printf("Login failed\n");
         delay(1);
-        system("clear"); // For Windows, use "cls".
+        // system("clear"); // For Windows, use "cls".
         login(user, json);
     }
 }
@@ -106,6 +135,7 @@ void login(Account *user, cJSON *json) {
 void menu(Account *user, cJSON *json) {
     int choice;
     do {
+        printf("\n–––––––––––––––––––\n");
         printf("1. Create new account\n");
         printf("2. Check balance\n");
         printf("3. Deposit\n");
@@ -114,7 +144,7 @@ void menu(Account *user, cJSON *json) {
         printf("6. Logout\n");
         printf("7. View details\n");
         printf("8. Delete account\n");
-        printf("9. Exit\n");
+        printf("–––––––––––––––––––\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
@@ -148,13 +178,10 @@ void menu(Account *user, cJSON *json) {
                 saveToFile(json, "accounts.json");
                 login(user, json); // Reattempt login after deleting the account
                 break;
-            case 9:
-                printf("Goodbye\n");
-                break;
             default:
                 printf("Invalid choice\n");
                 delay(1);
-                system("clear"); // For Windows, use "cls".
+                // system("clear"); // For Windows, use "cls".
                 break;
         }
     } while (choice != 9);
@@ -162,25 +189,42 @@ void menu(Account *user, cJSON *json) {
 
 void newAccount(cJSON *json) {
     Account newAccount;
+    int accountNumber = randomNumber(json);
 
+    printf("\n–––––––––––––––––––\n");
     printf("Enter your name: ");
     scanf("%s", newAccount.name);
-    printf("Enter your address: ");
-    scanf("%s", newAccount.address);
+    printf("Enter your country: ");
+    scanf("%s", newAccount.country);
+    printf("Enter your state: ");
+    scanf("%s", newAccount.state);
+    printf("Enter your city: ");
+    scanf("%s", newAccount.city);
+    printf("Enter your street: ");
+    scanf("%s", newAccount.street);
+    printf("Enter your house number (without spaces): ");
+    scanf("%s", newAccount.houseNumber);
     printf("Enter your phone number: ");
     scanf("%s", newAccount.phone);
     printf("Enter your pin: ");
     scanf("%s", newAccount.pin);
+    printf("Select a code for your account: ");
+    scanf("%3s", newAccount.code);
     printf("Enter your balance: ");
     scanf("%lf", &newAccount.balance);
+    printf("Your account number is: %d\n", accountNumber);
+    printf("–––––––––––––––––––\n");
 
     cJSON *accountObject = cJSON_CreateObject();
     cJSON_AddStringToObject(accountObject, "name", newAccount.name);
-    cJSON_AddStringToObject(accountObject, "address", newAccount.address);
+    cJSON_AddStringToObject(accountObject, "country", newAccount.country);
+    cJSON_AddStringToObject(accountObject, "state", newAccount.state);
+    cJSON_AddStringToObject(accountObject, "city", newAccount.city);
+    cJSON_AddStringToObject(accountObject, "street", newAccount.street);
+    cJSON_AddStringToObject(accountObject, "houseNumber", newAccount.houseNumber);
     cJSON_AddStringToObject(accountObject, "phone", newAccount.phone);
     cJSON_AddStringToObject(accountObject, "pin", newAccount.pin);
-    double accountNumber = randomNumber();
-    printf("Your account number is: %.2lf\n", accountNumber);
+    cJSON_AddStringToObject(accountObject, "code", newAccount.code);
     cJSON_AddNumberToObject(accountObject, "accountNumber", accountNumber);
     cJSON_AddNumberToObject(accountObject, "balance", newAccount.balance);
 
@@ -194,7 +238,7 @@ void newAccount(cJSON *json) {
 
     printf("\nAccount created successfully\n");
     delay(1);
-    system("clear"); // For Windows, use "cls".
+    // system("clear"); // For Windows, use "cls".
 }
 
 void checkBalance(const Account *user, cJSON *json) {
@@ -207,7 +251,9 @@ void checkBalance(const Account *user, cJSON *json) {
             double balance = cJSON_GetObjectItem(account, "balance")->valuedouble;
 
             if (strcmp(user->name, name) == 0) {
+                printf("\n–––––––––––––––––––\n");
                 printf("Your balance is %.2lf\n", balance);
+                printf("–––––––––––––––––––\n");
                 delay(1);
                 system("clear"); // For Windows, use "cls".
                 return;
@@ -217,7 +263,7 @@ void checkBalance(const Account *user, cJSON *json) {
 
     printf("Account not found\n");
     delay(1);
-    system("clear"); // For Windows, use "cls".
+    // system("clear"); // For Windows, use "cls".
 }
 
 void deposit(Account *user, cJSON *json) {
@@ -311,18 +357,20 @@ void viewDetails(const Account *user, cJSON *json) {
             const char *address = cJSON_GetObjectItem(account, "address")->valuestring;
             const char *phone = cJSON_GetObjectItem(account, "phone")->valuestring;
             const char *pin = cJSON_GetObjectItem(account, "pin")->valuestring;
-            double accountNumber = cJSON_GetObjectItem(account, "accountNumber")->valuedouble;
+            int accountNumber = cJSON_GetObjectItem(account, "accountNumber")->valueint;
             double balance = cJSON_GetObjectItem(account, "balance")->valuedouble;
 
             if (strcmp(user->name, name) == 0) {
+                printf("\n–––––––––––––––––––\n");
                 printf("Name: %s\n", name);
                 printf("Address: %s\n", address);
                 printf("Phone number: %s\n", phone);
                 printf("Pin: %s\n", pin);
-                printf("Account number: %.2lf\n", accountNumber);
+                printf("Account number: %d\n", accountNumber);
                 printf("Balance: %.2lf\n", balance);
+                printf("–––––––––––––––––––\n");
                 delay(1);
-                system("clear"); // For Windows, use "cls".
+                // system("clear"); // For Windows, use "cls".
                 return;
             }
         }
@@ -330,7 +378,7 @@ void viewDetails(const Account *user, cJSON *json) {
 
     printf("Account not found\n");
     delay(1);
-    system("clear"); // For Windows, use "cls".
+    // system("clear"); // For Windows, use "cls".
 }
 
 void deleteAccount(Account *user, cJSON *json) {
@@ -343,23 +391,24 @@ void deleteAccount(Account *user, cJSON *json) {
             const char *name = cJSON_GetObjectItem(account, "name")->valuestring;
             const char *pin = cJSON_GetObjectItem(account, "pin")->valuestring;
 
-            if (strcmp(user->name, name) == 0 && strcmp(user->pin, pin) == 0) {
-                continue;
+                if (strcmp(user->name, name) == 0 && strcmp(user->pin, pin) == 0) {
+                    continue;
+                }
+
+                cJSON_AddItemToArray(newAccounts, cJSON_Duplicate(account, 1));
             }
 
-            cJSON_AddItemToArray(newAccounts, cJSON_Duplicate(account, 1));
-        }
 
-        cJSON_DeleteItemFromObject(json, "accounts");
-        cJSON_AddItemToObject(json, "accounts", newAccounts);
+            cJSON_DeleteItemFromObject(json, "accounts");
+            cJSON_AddItemToObject(json, "accounts", newAccounts);
+            printf("Account deleted successfully\n");
+            delay(1);
 
-        printf("Account deleted successfully\n");
-        delay(1);
-        system("clear"); // For Windows, use "cls".
+        // system("clear"); // For Windows, use "cls".
     } else {
         printf("No accounts to delete\n");
         delay(1);
-        system("clear"); // For Windows, use "cls".
+        // system("clear"); // For Windows, use "cls".
     }
 }
 
@@ -438,12 +487,33 @@ void delay(int number_of_seconds) {
     while (clock() < start_time + milli_seconds);
 }
 
-int randomNumber()
-{
-    int i, num = 0;
-    int lower = 100000, upper = 999999;
-    for (i = 0; i < 7; i++) {
+
+int randomNumber(cJSON *json) {
+    int num;
+    int lower = 10000000, upper = 99999999;
+
+    cJSON *accounts = cJSON_GetObjectItem(json, "accounts");
+    if (cJSON_IsArray(accounts)) {
+        int arraySize = cJSON_GetArraySize(accounts);
+        do {
+            num = (rand() % (upper - lower + 1)) + lower;
+        } while (accountNumberExists(num, accounts, arraySize));
+    } else {
         num = (rand() % (upper - lower + 1)) + lower;
     }
+
     return num;
+}
+
+// Function to check if an account number exists in the array
+int accountNumberExists(int num, cJSON *accounts, int size) {
+    for (int i = 0; i < size; i++) {
+        cJSON *account = cJSON_GetArrayItem(accounts, i);
+        int accountNumber = cJSON_GetObjectItem(account, "accountNumber")->valueint;
+
+        if (accountNumber == num) {
+            return 1;
+        }
+    }
+    return 0;
 }
