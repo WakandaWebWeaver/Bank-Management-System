@@ -92,7 +92,7 @@ void login(Account *user, cJSON *json) {
                 } else {
                     printf("Incorrect pin\n");
                     delay(1);
-                     system("clear"); // For Windows, use "cls"
+                    system("clear"); // For Windows, use "cls"
                     login(user, json);
                 }
             }
@@ -206,10 +206,8 @@ void newAccount(cJSON *json) {
     scanf("%s", newAccount.houseNumber);
     printf("Enter your phone number: ");
     scanf("%s", newAccount.phone);
-    printf("Enter your pin: ");
+    printf("Enter a pin for your account: ");
     scanf("%s", newAccount.pin);
-    printf("Select a code for your account: ");
-    scanf("%3s", newAccount.code);
     printf("Enter your balance: ");
     scanf("%lf", &newAccount.balance);
     printf("Your account number is: %d\n", accountNumber);
@@ -224,7 +222,6 @@ void newAccount(cJSON *json) {
     cJSON_AddStringToObject(accountObject, "houseNumber", newAccount.houseNumber);
     cJSON_AddStringToObject(accountObject, "phone", newAccount.phone);
     cJSON_AddStringToObject(accountObject, "pin", newAccount.pin);
-    cJSON_AddStringToObject(accountObject, "code", newAccount.code);
     cJSON_AddNumberToObject(accountObject, "accountNumber", accountNumber);
     cJSON_AddNumberToObject(accountObject, "balance", newAccount.balance);
 
@@ -354,7 +351,11 @@ void viewDetails(const Account *user, cJSON *json) {
         for (int i = 0; i < arraySize; i++) {
             cJSON *account = cJSON_GetArrayItem(accounts, i);
             const char *name = cJSON_GetObjectItem(account, "name")->valuestring;
-            const char *address = cJSON_GetObjectItem(account, "address")->valuestring;
+            const char *country = cJSON_GetObjectItem(account, "country")->valuestring;
+            const char *state = cJSON_GetObjectItem(account, "state")->valuestring;
+            const char *city = cJSON_GetObjectItem(account, "city")->valuestring;
+            const char *street = cJSON_GetObjectItem(account, "street")->valuestring;
+            const char *houseNumber = cJSON_GetObjectItem(account, "houseNumber")->valuestring;
             const char *phone = cJSON_GetObjectItem(account, "phone")->valuestring;
             const char *pin = cJSON_GetObjectItem(account, "pin")->valuestring;
             int accountNumber = cJSON_GetObjectItem(account, "accountNumber")->valueint;
@@ -363,7 +364,7 @@ void viewDetails(const Account *user, cJSON *json) {
             if (strcmp(user->name, name) == 0) {
                 printf("\n–––––––––––––––––––\n");
                 printf("Name: %s\n", name);
-                printf("Address: %s\n", address);
+                printf("Address: \nCountry: %s\nState: %s\nCity: %s\nStreet: %s\nHouse number: %s\n", country, state, city, street, houseNumber);
                 printf("Phone number: %s\n", phone);
                 printf("Pin: %s\n", pin);
                 printf("Account number: %d\n", accountNumber);
@@ -391,18 +392,18 @@ void deleteAccount(Account *user, cJSON *json) {
             const char *name = cJSON_GetObjectItem(account, "name")->valuestring;
             const char *pin = cJSON_GetObjectItem(account, "pin")->valuestring;
 
-                if (strcmp(user->name, name) == 0 && strcmp(user->pin, pin) == 0) {
-                    continue;
-                }
-
-                cJSON_AddItemToArray(newAccounts, cJSON_Duplicate(account, 1));
+            if (strcmp(user->name, name) == 0 && strcmp(user->pin, pin) == 0) {
+                continue;
             }
 
+            cJSON_AddItemToArray(newAccounts, cJSON_Duplicate(account, 1));
+        }
 
-            cJSON_DeleteItemFromObject(json, "accounts");
-            cJSON_AddItemToObject(json, "accounts", newAccounts);
-            printf("Account deleted successfully\n");
-            delay(1);
+
+        cJSON_DeleteItemFromObject(json, "accounts");
+        cJSON_AddItemToObject(json, "accounts", newAccounts);
+        printf("Account deleted successfully\n");
+        delay(1);
 
         // system("clear"); // For Windows, use "cls".
     } else {
