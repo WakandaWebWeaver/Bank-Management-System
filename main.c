@@ -309,6 +309,18 @@ void withdraw(Account *user, cJSON *json) {
                     return;
                 }
 
+                if(amount > 1000) {
+                    printf("Enter pin to continue: ");
+                    char conPin[MAX_PIN_LENGTH];
+                    scanf("%s", conPin);
+                    if(strcmp(conPin, pin) != 0) {
+                        printf("Incorrect pin\n");
+                        return;
+                    }
+                    cJSON_SetNumberValue(cJSON_GetObjectItem(account, "balance"), balance - amount);
+                    saveToFile(json, JSON_FILE);
+                    printf("Amount withdrawn successfully\n");
+                }
                 cJSON_SetNumberValue(cJSON_GetObjectItem(account, "balance"), balance - amount);
                 saveToFile(json, JSON_FILE);
                 printf("Amount withdrawn successfully\n");
@@ -322,8 +334,6 @@ void withdraw(Account *user, cJSON *json) {
 
 void changePin(Account *user, cJSON *json) {
     char newPin[MAX_NAME_LENGTH];
-    printf("Enter your new pin: ");
-    scanf("%s", newPin);
 
     cJSON *accounts = cJSON_GetObjectItem(json, "accounts");
     if (cJSON_IsArray(accounts)) {
@@ -334,6 +344,13 @@ void changePin(Account *user, cJSON *json) {
             const char *pin = cJSON_GetObjectItem(account, "pin")->valuestring;
 
             if (strcmp(user->name, name) == 0 && strcmp(user->pin, pin) == 0) {
+                printf("Enter old pin to continue: ");
+                char oldPin[MAX_PIN_LENGTH];
+                scanf("%s", oldPin);
+                if(strcmp(oldPin, pin) != 0) {
+                    printf("Incorrect pin\n");
+                    return;
+                }
                 cJSON_SetValuestring(cJSON_GetObjectItem(account, "pin"), newPin);
                 saveToFile(json, JSON_FILE);
                 printf("Pin changed successfully\n");
@@ -391,8 +408,15 @@ void deleteAccount(Account *user, cJSON *json) {
             cJSON *account = cJSON_GetArrayItem(accounts, i);
             const char *name = cJSON_GetObjectItem(account, "name")->valuestring;
             const char *pin = cJSON_GetObjectItem(account, "pin")->valuestring;
+            int balance = cJSON_GetObjectItem(account, "balance")->valueint;
 
             if (strcmp(user->name, name) == 0 && strcmp(user->pin, pin) == 0) {
+                if(balance > 0) {
+                    printf("You have a balance of %d in your account. Please withdraw the amount to continue\n"
+                           "You were logged out for security reasons.\n"
+                           "Please login again.\n", balance);
+                    return;
+                }
                 continue;
             }
 
@@ -400,6 +424,13 @@ void deleteAccount(Account *user, cJSON *json) {
         }
 
 
+        printf("Enter your pin to continue: ");
+        char conPin[MAX_PIN_LENGTH];
+        scanf("%s", conPin);
+        if(strcmp(conPin, user->pin) != 0) {
+            printf("Incorrect pin\n");
+            return;
+        }
         cJSON_DeleteItemFromObject(json, "accounts");
         cJSON_AddItemToObject(json, "accounts", newAccounts);
         printf("Account deleted successfully\n");
