@@ -187,7 +187,7 @@ void login(Account *user, cJSON *json) {
 void menu(Account *user, cJSON *json) {
     int choice;
     do {
-        printf("\n–––––––––––––––––––\n");
+        printf("\n---------------------\n");
         printf("1. Create new account\n");
         printf("2. Check balance\n");
         printf("3. Deposit\n");
@@ -196,7 +196,7 @@ void menu(Account *user, cJSON *json) {
         printf("6. Logout\n");
         printf("7. View details\n");
         printf("8. Delete account\n");
-        printf("–––––––––––––––––––\n");
+        printf("---------------------\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
@@ -246,7 +246,7 @@ void newAccount(cJSON *json) {
     char securityQuestion[MAX_NAME_LENGTH];
 
 
-    printf("\n–––––––––––––––––––\n");
+    printf("\n---------------------\n");
     printf("Enter your name: ");
     scanf("%s", newAccount.name);
     printf("Enter your country: ");
@@ -272,7 +272,7 @@ void newAccount(cJSON *json) {
     fgets(securityAnswer, MAX_NAME_LENGTH, stdin);
     securityAnswer[strcspn(securityAnswer, "\n")] = '\0';
     printf("Your account number is: %d\n", accountNumber);
-    printf("–––––––––––––––––––\n");
+    printf("---------------------\n");
 
     cJSON *accountObject = cJSON_CreateObject();
     cJSON_AddStringToObject(accountObject, "name", newAccount.name);
@@ -312,9 +312,9 @@ void checkBalance(const Account *user, cJSON *json) {
             double balance = cJSON_GetObjectItem(account, "balance")->valuedouble;
 
             if (strcmp(user->name, name) == 0 && accNumber == strtol(user->accountNumber, NULL, 10)) {
-                printf("\n–––––––––––––––––––\n");
+                printf("\n---------------------\n");
                 printf("Your balance is %.2lf\n", balance);
-                printf("–––––––––––––––––––\n");
+                printf("---------------------\n");
                 delay(1);
                 system("clear"); // For Windows, use "cls".
                 return;
@@ -454,14 +454,14 @@ void viewDetails(const Account *user, cJSON *json) {
             double balance = cJSON_GetObjectItem(account, "balance")->valuedouble;
 
             if (strcmp(user->name, name) == 0 && accountNumber == strtol(user->accountNumber, NULL, 10)) {
-                printf("\n–––––––––––––––––––\n");
+                printf("\n---------------------\n");
                 printf("Name: %s\n", name);
                 printf("Address: \nCountry: %s\nState: %s\nCity: %s\nStreet: %s\nHouse number: %s\n", country, state, city, street, houseNumber);
                 printf("Phone number: %s\n", phone);
                 printf("Pin: %s\n", pin);
                 printf("Account number: %d\n", accountNumber);
                 printf("Balance: %.2lf\n", balance);
-                printf("–––––––––––––––––––\n");
+                printf("---------------------\n");
                 delay(1);
                 // system("clear"); // For Windows, use "cls".
                 return;
