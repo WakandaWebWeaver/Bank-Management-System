@@ -418,15 +418,23 @@ void changePin(Account *user, cJSON *json) {
                     printf("Incorrect pin\n");
                     return;
                 }
+                printf("Enter new pin: ");
+                scanf("%s", newPin);
                 cJSON_SetValuestring(cJSON_GetObjectItem(account, "pin"), newPin);
                 saveToFile(json, JSON_FILE);
                 printf("Pin changed successfully\n");
+                printf("Please login again\n");
+                delay(1);
+                // system("clear"); // For Windows, use "cls".
+                login(user, json);
                 return;
             }
         }
     }
-
     printf("Account not found\n");
+    printf("The user had to be logged out due to a technical glitch.\nPlease login again\n");
+    delay(1);
+    login(user, json);
 }
 void viewDetails(const Account *user, cJSON *json) {
     cJSON *accounts = cJSON_GetObjectItem(json, "accounts");
@@ -497,6 +505,7 @@ void deleteAccount(Account *user, cJSON *json) {
         scanf("%s", conPin);
         if(strcmp(conPin, user->pin) != 0) {
             printf("Incorrect pin\n");
+            printf("Login again\n");
             return;
         }
         cJSON_DeleteItemFromObject(json, "accounts");
