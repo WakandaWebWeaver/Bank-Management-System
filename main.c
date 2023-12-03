@@ -308,10 +308,10 @@ void checkBalance(const Account *user, cJSON *json) {
         for (int i = 0; i < arraySize; i++) {
             cJSON *account = cJSON_GetArrayItem(accounts, i);
             const int accNumber = cJSON_GetObjectItem(account, "accountNumber")->valueint;
-            const char *name = cJSON_GetObjectItem(account, "name")->valuestring;
+            const char *pin = cJSON_GetObjectItem(account, "pin")->valuestring;
             double balance = cJSON_GetObjectItem(account, "balance")->valuedouble;
 
-            if (strcmp(user->name, name) == 0 && accNumber == strtol(user->accountNumber, NULL, 10)) {
+            if (strcmp(user->pin, pin) == 0 && accNumber == strtol(user->accountNumber, NULL, 10)) {
                 printf("\n---------------------\n");
                 printf("Your balance is %.2lf\n", balance);
                 printf("---------------------\n");
@@ -338,11 +338,10 @@ void deposit(Account *user, cJSON *json) {
         for (int i = 0; i < arraySize; i++) {
             cJSON *account = cJSON_GetArrayItem(accounts, i);
             const int accNumber = cJSON_GetObjectItem(account, "accountNumber")->valueint;
-            const char *name = cJSON_GetObjectItem(account, "name")->valuestring;
             const char *pin = cJSON_GetObjectItem(account, "pin")->valuestring;
             double balance = cJSON_GetObjectItem(account, "balance")->valuedouble;
 
-            if (strcmp(user->name, name) == 0 && strcmp(user->pin, pin) == 0 && accNumber == strtol(user->accountNumber, NULL, 10)) {
+            if (strcmp(user->pin, pin) == 0 && accNumber == strtol(user->accountNumber, NULL, 10)) {
                 cJSON_SetNumberValue(cJSON_GetObjectItem(account, "balance"), balance + amount);
                 saveToFile(json, JSON_FILE);
                 printf("Amount deposited successfully\n");
@@ -365,11 +364,10 @@ void withdraw(Account *user, cJSON *json) {
         for (int i = 0; i < arraySize; i++) {
             cJSON *account = cJSON_GetArrayItem(accounts, i);
             const int accNumber = cJSON_GetObjectItem(account, "accountNumber")->valueint;
-            const char *name = cJSON_GetObjectItem(account, "name")->valuestring;
             const char *pin = cJSON_GetObjectItem(account, "pin")->valuestring;
             double balance = cJSON_GetObjectItem(account, "balance")->valuedouble;
 
-            if (strcmp(user->name, name) == 0 && strcmp(user->pin, pin) == 0 && accNumber == strtol(user->accountNumber, NULL, 10)) {
+            if (strcmp(user->pin, pin) == 0 && accNumber == strtol(user->accountNumber, NULL, 10)) {
                 if (balance < amount) {
                     printf("Insufficient balance\n");
                     return;
@@ -407,10 +405,9 @@ void changePin(Account *user, cJSON *json) {
         for (int i = 0; i < arraySize; i++) {
             cJSON *account = cJSON_GetArrayItem(accounts, i);
             const int accNumber = cJSON_GetObjectItem(account, "accountNumber")->valueint;
-            const char *name = cJSON_GetObjectItem(account, "name")->valuestring;
             const char *pin = cJSON_GetObjectItem(account, "pin")->valuestring;
 
-            if (strcmp(user->name, name) == 0 && strcmp(user->pin, pin) == 0 && accNumber == strtol(user->accountNumber, NULL, 10)) {
+            if (strcmp(user->pin, pin) == 0 && accNumber == strtol(user->accountNumber, NULL, 10)) {
                 printf("Enter old pin to continue: ");
                 char oldPin[MAX_PIN_LENGTH];
                 scanf("%s", oldPin);
@@ -453,7 +450,7 @@ void viewDetails(const Account *user, cJSON *json) {
             int accountNumber = cJSON_GetObjectItem(account, "accountNumber")->valueint;
             double balance = cJSON_GetObjectItem(account, "balance")->valuedouble;
 
-            if (strcmp(user->name, name) == 0 && accountNumber == strtol(user->accountNumber, NULL, 10)) {
+            if (strcmp(user->pin, pin) == 0 && accountNumber == strtol(user->accountNumber, NULL, 10)) {
                 printf("\n---------------------\n");
                 printf("Name: %s\n", name);
                 printf("Address: \nCountry: %s\nState: %s\nCity: %s\nStreet: %s\nHouse number: %s\n", country, state, city, street, houseNumber);
@@ -482,11 +479,10 @@ void deleteAccount(Account *user, cJSON *json) {
         for (int i = 0; i < arraySize; i++) {
             cJSON *account = cJSON_GetArrayItem(accounts, i);
             const int accNumber = cJSON_GetObjectItem(account, "accountNumber")->valueint;
-            const char *name = cJSON_GetObjectItem(account, "name")->valuestring;
             const char *pin = cJSON_GetObjectItem(account, "pin")->valuestring;
             int balance = cJSON_GetObjectItem(account, "balance")->valueint;
 
-            if (strcmp(user->name, name) == 0 && strcmp(user->pin, pin) == 0 && accNumber == strtol(user->accountNumber, NULL, 10)) {
+            if (strcmp(user->pin, pin) == 0 && accNumber == strtol(user->accountNumber, NULL, 10)) {
                 if(balance > 0) {
                     printf("You have a balance of %d in your account. Please withdraw the amount to continue\n"
                            "You were logged out for security reasons.\n"
