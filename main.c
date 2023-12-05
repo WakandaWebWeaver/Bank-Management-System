@@ -165,8 +165,6 @@ void login(Account *user, cJSON *json) {
         }
     }
 
-    // Account creation intent. Invoked when username not detected.
-    // Now, it only gets called when an incorrect pin has been entered. Need to fix.
     printf("User does not exist. Do you want to create a new account? (yes or no): ");
     char *createNewAccount = malloc(sizeof(char) * 3);
     scanf("%s", createNewAccount);
@@ -271,7 +269,7 @@ void newAccount(cJSON *json) {
     printf("Please answer your security question: %s: ", securityQuestion);
     fgets(securityAnswer, MAX_NAME_LENGTH, stdin);
     securityAnswer[strcspn(securityAnswer, "\n")] = '\0';
-    printf("Your account number is: %d\n", accountNumber);
+    printf("Your account number is: %d\nPlease copy or remember it.", accountNumber);
     printf("---------------------\n");
 
     cJSON *accountObject = cJSON_CreateObject();
