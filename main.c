@@ -106,7 +106,7 @@ int main() {
 }
 
 void welcome() {
-    printf("Welcome to the Bank\n");
+    printf("Welcome to The Bank\n");
     // system("clear"); // For Windows, use "cls".
 }
 
@@ -117,6 +117,7 @@ void login(Account *user, cJSON *json) {
     scanf("%s", user->accountNumber);
 
     cJSON *accounts = cJSON_GetObjectItem(json, "accounts");
+
     if (cJSON_IsArray(accounts)) {
         int arraySize = cJSON_GetArraySize(accounts);
         for (int i = 0; i < arraySize; i++) {
@@ -177,7 +178,7 @@ void login(Account *user, cJSON *json) {
     } else {
         printf("Login failed\n");
         delay(1);
-        // system("clear"); // For Windows, use "cls".
+        // system("clear"); // "cls".
         login(user, json);
     }
 }
@@ -270,7 +271,7 @@ void newAccount(cJSON *json) {
     fgets(securityAnswer, MAX_NAME_LENGTH, stdin);
     securityAnswer[strcspn(securityAnswer, "\n")] = '\0';
     printf("Your account number is: %d\nPlease copy or remember it.", accountNumber);
-    printf("---------------------\n");
+    printf("\n---------------------\n");
 
     cJSON *accountObject = cJSON_CreateObject();
     cJSON_AddStringToObject(accountObject, "name", newAccount.name);
@@ -431,6 +432,7 @@ void changePin(Account *user, cJSON *json) {
     delay(1);
     login(user, json);
 }
+
 void viewDetails(const Account *user, cJSON *json) {
     cJSON *accounts = cJSON_GetObjectItem(json, "accounts");
     if (cJSON_IsArray(accounts)) {
@@ -470,6 +472,10 @@ void viewDetails(const Account *user, cJSON *json) {
 }
 
 void deleteAccount(Account *user, cJSON *json) {
+    char *confirm = malloc(sizeof(char) * 3);
+    char conPin[MAX_PIN_LENGTH];
+
+
     cJSON *accounts = cJSON_GetObjectItem(json, "accounts");
     if (cJSON_IsArray(accounts)) {
         int arraySize = cJSON_GetArraySize(accounts);
@@ -495,13 +501,20 @@ void deleteAccount(Account *user, cJSON *json) {
 
 
         printf("Enter your pin to continue: ");
-        char conPin[MAX_PIN_LENGTH];
         scanf("%s", conPin);
         if(strcmp(conPin, user->pin) != 0) {
             printf("Incorrect pin\n");
             printf("Login again\n");
             return;
         }
+
+        printf("Are you sure you want to delete your account? This action is not reversible. (yes or no): ");
+        scanf("%s", confirm);
+        if (strcmp((const char *) confirm, "yes") != 0) {
+            printf("Account not deleted\n");
+            return;
+        }
+
         cJSON_DeleteItemFromObject(json, "accounts");
         cJSON_AddItemToObject(json, "accounts", newAccounts);
         printf("Account deleted successfully\n");
@@ -518,13 +531,13 @@ void deleteAccount(Account *user, cJSON *json) {
 void saveToFile(const cJSON *json, const char *filename) {
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
-        perror("Error opening file");
+        perror("Error opening file. Function saveToFile()");
         exit(EXIT_FAILURE);
     }
 
     char *jsonStr = cJSON_Print(json);
     if (jsonStr == NULL) {
-        perror("Error creating JSON string");
+        perror("Error creating JSON string. Function saveToFile()");
         fclose(file);
         exit(EXIT_FAILURE);
     }
@@ -541,7 +554,7 @@ cJSON *loadFromFile(const char *filename) {
         // If the file doesn't exist, create it
         file = fopen(filename, "w");
         if (file == NULL) {
-            perror("Error creating file");
+            perror("Error creating file. Function loadFromFile()");
             exit(EXIT_FAILURE);
         }
         fclose(file);
@@ -554,24 +567,27 @@ cJSON *loadFromFile(const char *filename) {
 
     char *buffer = (char *)malloc(fileSize + 1);
     if (buffer == NULL) {
-        perror("Error allocating memory");
+        perror("Error allocating memory. Function loadFromFile()");
         fclose(file);
         exit(EXIT_FAILURE);
     }
 
     size_t bytesRead = fread(buffer, 1, fileSize, file);
-    if (bytesRead < fileSize) {
-        perror("Error reading file");
-        fclose(file);
-        free(buffer);
-        exit(EXIT_FAILURE);
-    }
+//    if (bytesRead < fileSize) {
+//        perror("Error reading file. Function loadFromFile()");
+//        fclose(file);
+//        free(buffer);
+//        exit(EXIT_FAILURE);
+//    }
+// Problem when running on windows, windows cache system does not get cleared which means the program will always
+// read the same file size even if the file size has changed, the buffer will not be big enough to
+// store the file contents
 
     buffer[fileSize] = '\0';
 
     cJSON *json = cJSON_Parse(buffer);
     if (json == NULL) {
-        perror("Error parsing JSON");
+        perror("Error parsing JSON. Function loadFromFile()");
         fclose(file);
         free(buffer);
         exit(EXIT_FAILURE);
@@ -590,7 +606,6 @@ void delay(int number_of_seconds) {
     while (clock() < start_time + milli_seconds);
 }
 
-
 int randomNumber(cJSON *json) {
     int num;
     int lower = 10000000, upper = 99999999;
@@ -608,7 +623,6 @@ int randomNumber(cJSON *json) {
     return num;
 }
 
-// Function to check if an account number exists in the array
 int accountNumberExists(int num, cJSON *accounts, int size) {
     for (int i = 0; i < size; i++) {
         cJSON *account = cJSON_GetArrayItem(accounts, i);
